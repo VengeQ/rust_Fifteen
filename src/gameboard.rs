@@ -28,10 +28,10 @@ impl fmt::Display for Gameboard {
 
         let c = self.cells;
         let transposed = vec![
-            c[0][0], c[0][1], c[0][2], c[0][3],
-            c[1][0], c[1][1], c[1][2], c[1][3],
-            c[2][0], c[2][1], c[2][2], c[2][3],
-            c[3][0], c[3][1], c[3][2], c[3][3]];
+            c[0][0], c[1][0], c[2][0], c[3][0],
+            c[0][1], c[1][1], c[2][1], c[3][1],
+            c[0][2], c[1][2], c[2][2], c[3][2],
+            c[0][3], c[1][3], c[2][3], c[3][3]];
 
         let res: Vec<String> = transposed.iter()
             .map(|x| normalize(*x))
@@ -117,9 +117,11 @@ impl Gameboard {
 
     pub fn swap_with_zero(&mut self, cell: (usize, usize)) -> bool {
         let zero = self.zero();
-        dbg!(cell);
-        dbg!(zero);
-        if Gameboard::is_neighbours(cell, zero) {
+       // dbg!(cell);
+      //  dbg!(zero);
+        let isn = Gameboard::is_neighbours(cell, zero);
+      //  dbg!("Is_neighbours:{}",isn);
+        if isn {
             let temporary = self.cells[cell.0][cell.1];
             self.cells[cell.0][cell.1] = self.cells[zero.0][zero.1];
             self.cells[zero.0][zero.1] = temporary;
@@ -144,7 +146,7 @@ mod tests {
         let gameboard = Gameboard::new();
         let gameboard_flatten = gameboard.cells.iter()
             .flat_map(|x| vec![x[0], x[1], x[2], x[3]]).collect::<Vec<u8>>();
-        dbg!(&gameboard);
+      //  dbg!(&gameboard);
         //Каждое число встречается не более одного раза
         for x in &gameboard_flatten {
             assert_eq!(gameboard_flatten.iter().filter(|v| *v == x).count(), 1);
