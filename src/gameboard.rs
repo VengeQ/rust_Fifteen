@@ -4,12 +4,19 @@ use rand::thread_rng;
 use rand::seq::SliceRandom;
 
 const SIZE: usize = 4;
-
+///
+/// Current cells with [[u8; SIZE]; SIZE]
+/// may be inappropriate, and [u8;SIZE*SIZE]
+/// with easy linear arithmetic (web-assembly plain style) looks good.
+///
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Gameboard {
     pub cells: [[u8; SIZE]; SIZE]
 }
 
+///
+/// May be some functions should contains in controller?!
+///
 impl Gameboard {
     ///
     /// Generate new gameboard with shuffled numbers
@@ -26,18 +33,19 @@ impl Gameboard {
         Gameboard { cells }
     }
 
+    /// return 0-biased zero field (x,y)
     pub fn zero(&self) -> (usize, usize) {
         for x in 0..4 {
             for y in 0..4 {
                 if self.cells[x][y] == 0 {
-                    dbg!("x:{} y:{}",x,y);
                     return (x, y);
                 }
             }
         }
-        panic!("No null value found")
+        panic!("No zero value found")
     }
 
+    /// Shuffle values while init new board
     fn shuffle_vec() -> Vec<u8> {
         let mut rng = thread_rng();
         let mut vec: Vec<u8> = (0..16).collect();
@@ -64,6 +72,16 @@ mod tests {
         //Каждое число встречается не более одного раза
         for x in &gameboard_flatten {
             assert_eq!(gameboard_flatten.iter().filter(|v| *v == x).count(), 1);
+        }
+    }
+
+    #[test]
+    fn zero_test_smoke() {
+        for _ in 0..100 {
+            let gameboard = Gameboard::new();
+            let (x, y) = gameboard.zero();
+            assert!(x <= 3);
+            assert!(y <= 3);
         }
     }
 }

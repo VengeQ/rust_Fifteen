@@ -1,9 +1,9 @@
 use graphics::types::Color;
 use graphics::{Context, Graphics};
 
-use super::gameboard_view;
 use super::gameboard_controller::GameboardController;
 
+///Rendering settings
 pub struct GameboardViewSettings {
     pub position: [f64; 2],
     pub size: f64,
@@ -58,12 +58,23 @@ impl GameboardView {
             .draw(board_rect, &c.draw_state, c.transform, g);
 
         let (zx, zy) = controller.gameboard.zero();
-        dbg!("zx:{} zy:{}",zx,zy);
+        //dbg!("zx:{} zy:{}",zx,zy);
         let zero_rect = [
             settings.position[0] + settings.size / 4.0 * zx as f64,
             settings.position[1] + settings.size / 4.0 * zy as f64,
             settings.size / 4.0, settings.size / 4.0,
         ];
+
+        if let Some(sel) = controller.selected {
+            let selected_rect = [
+                settings.position[0] + settings.size / 4.0 * sel[0] as f64,
+                settings.position[1] + settings.size / 4.0 * sel[1] as f64,
+                settings.size / 4.0, settings.size / 4.0,
+            ];
+
+            Rectangle::new(settings.zero_color)
+                .draw(selected_rect, &c.draw_state, c.transform, g);
+        }
 
 
         Rectangle::new(settings.zero_color)
