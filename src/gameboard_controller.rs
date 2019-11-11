@@ -3,7 +3,7 @@ use super::Gameboard;
 use piston::input::GenericEvent;
 
 pub struct GameboardController{
-    gameboard:Gameboard
+    pub gameboard:Gameboard
 }
 
 impl GameboardController{

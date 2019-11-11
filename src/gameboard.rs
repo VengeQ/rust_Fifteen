@@ -7,21 +7,35 @@ const SIZE: usize = 4;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Gameboard {
-    cells: [[u8; SIZE]; SIZE]
+    pub cells: [[u8; SIZE]; SIZE]
 }
 
 impl Gameboard {
+    ///
+    /// Generate new gameboard with shuffled numbers
+    ///
     pub fn new() -> Self {
         let vec = Gameboard::shuffle_vec();
         let mut cells = [[0; SIZE]; SIZE];
-
         for i in 0..SIZE {
             for j in 0..SIZE {
                 cells[i][j] = vec[i * SIZE + j];
             }
         }
-
+        dbg!(&cells);
         Gameboard { cells }
+    }
+
+    pub fn zero(&self) -> (usize, usize) {
+        for x in 0..4 {
+            for y in 0..4 {
+                if self.cells[x][y] == 0 {
+                    dbg!("x:{} y:{}",x,y);
+                    return (x, y);
+                }
+            }
+        }
+        panic!("No null value found")
     }
 
     fn shuffle_vec() -> Vec<u8> {
@@ -46,13 +60,10 @@ mod tests {
         let gameboard = Gameboard::new();
         let gameboard_flatten = gameboard.cells.iter()
             .flat_map(|x| vec![x[0], x[1], x[2], x[3]]).collect::<Vec<u8>>();
-
         dbg!(&gameboard);
-
         //Каждое число встречается не более одного раза
         for x in &gameboard_flatten {
             assert_eq!(gameboard_flatten.iter().filter(|v| *v == x).count(), 1);
         }
-
     }
 }
