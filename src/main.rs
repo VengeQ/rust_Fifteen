@@ -36,6 +36,8 @@ fn main() {
     let mut events = Events::new(EventSettings::new().lazy(true)); //lazy, так как анимации не будет никакой.
     let mut gl = GlGraphics::new(opengl);
     let gameboard = Gameboard::new();
+    println!("{}", &gameboard);
+    dbg!(&gameboard);
     let mut gameboard_controller = GameboardController::new(gameboard);
     let gameboard_view_settings = GameboardViewSettings::new();
     let gameboard_view = GameboardView::new(gameboard_view_settings);
