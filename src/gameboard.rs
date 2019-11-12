@@ -88,7 +88,7 @@ impl Gameboard {
     /// Fill empty symbol
     fn normalize(x: u8) -> String {
         match x {
-            0 => "zz".to_owned(),
+            0 => "".to_owned(),
             v if v < 10 => format!("0{}", v),
             v => format!("{}", v)
         }

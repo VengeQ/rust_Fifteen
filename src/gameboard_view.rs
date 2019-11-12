@@ -1,6 +1,6 @@
 use graphics::types::Color;
-use graphics::{Context, Graphics};
-
+use graphics::{Context, Graphics, Image, Transformed, text};
+use graphics::character::CharacterCache;
 use super::gameboard_controller::GameboardController;
 
 ///Rendering settings
@@ -18,6 +18,7 @@ pub struct GameboardViewSettings {
     pub board_edge_radius: f64,
     /// Edge radius between cells.
     pub cell_edge_radius: f64,
+    pub text_color: Color,
 }
 
 impl GameboardViewSettings {
@@ -31,6 +32,7 @@ impl GameboardViewSettings {
             between_color: [0.5, 0.5, 0.5, 1.0],
             board_edge_radius: 2.0,
             cell_edge_radius: 1.0,
+            text_color: [1.0, 1.0, 1.0, 1.0],
         }
     }
 }
@@ -45,7 +47,7 @@ impl GameboardView {
     }
 
     /// Draw gameboard.
-    pub fn draw<G: Graphics>(&self, controller: &GameboardController, c: &Context, g: &mut G) {
+    pub fn draw<G: Graphics, C: CharacterCache<Texture=G::Texture>>(&self, controller: &GameboardController, glyphs: &mut C, c: &Context, g: &mut G) {
         use graphics::{Line, Rectangle};
 
         let ref settings = self.settings;
@@ -56,6 +58,8 @@ impl GameboardView {
 
         Rectangle::new(settings.background_color)
             .draw(board_rect, &c.draw_state, c.transform, g);
+
+        let white= [1.0, 1.0, 1.0, 1.0];
 
         let (zx, zy) = controller.gameboard.zero();
         //dbg!("zx:{} zy:{}",zx,zy);
@@ -77,7 +81,7 @@ impl GameboardView {
         }
 
 
-        Rectangle::new(settings.zero_color)
+        Rectangle::new(white)
             .draw(zero_rect, &c.draw_state, c.transform, g);
 
 
@@ -97,10 +101,29 @@ impl GameboardView {
         }
         Rectangle::new_border(settings.border_color, settings.board_edge_radius)
             .draw(board_rect, &c.draw_state, c.transform, g);
+
+        //Draw cells charactes
+        let text_image = Image::new_color(settings.text_color);
+        let cell_size = settings.size / 4.0;
+        for j in 0..4 {
+            for i in 0..4 {
+                let ch = controller.gameboard.cell_as_string((i, j));
+                let pos = [
+                    settings.position[0] + i as f64 * cell_size + 30.0,
+                    settings.position[1] + j as f64 * cell_size + 60.0
+                ];
+
+                text::Text::new_color([0.0, 0.0, 0.0, 1.0], 40)
+                    .draw(&ch,
+                          glyphs,
+                          &c.draw_state,
+                          c.transform.trans(pos[0], pos[1]),
+                          g).unwrap_or_else(|_|());
+            }
+        }
     }
-
-
 }
+
 
 
 

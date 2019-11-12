@@ -21,8 +21,7 @@ use piston::window::WindowSettings;
 use piston::event_loop::*;
 use piston::input::*;
 use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{GlGraphics, OpenGL};
-
+use opengl_graphics::{OpenGL, Filter, GlGraphics, GlyphCache, TextureSettings};
 
 fn main() {
     let opengl = OpenGL::V3_2;
@@ -35,6 +34,8 @@ fn main() {
 
     let mut events = Events::new(EventSettings::new().lazy(true)); //lazy, так как анимации не будет никакой.
     let mut gl = GlGraphics::new(opengl);
+    let texture_settings = TextureSettings::new().filter(Filter::Nearest);
+    let ref mut glyphs = GlyphCache::new("assets/amazone.ttf", (), texture_settings).expect("Could not load font");
     let gameboard = Gameboard::new();
     println!("{}", &gameboard);
     dbg!(&gameboard);
@@ -49,7 +50,7 @@ fn main() {
                 use graphics::clear;
 
                 clear([1.0; 4], g);
-                gameboard_view.draw(&gameboard_controller, &c, g);
+                gameboard_view.draw(&gameboard_controller,  glyphs, &c, g);
             });
         }
     }
