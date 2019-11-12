@@ -18,13 +18,7 @@ pub struct Gameboard {
 
 impl fmt::Display for Gameboard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fn normalize(x: u8) -> String {
-            match x {
-                0 => "zz".to_owned(),
-                v if v < 10 => format!("0{}", v),
-                v => format!("{}", v)
-            }
-        }
+
 
         let c = self.cells;
         let transposed = vec![
@@ -34,7 +28,7 @@ impl fmt::Display for Gameboard {
             c[0][3], c[1][3], c[2][3], c[3][3]];
 
         let res: Vec<String> = transposed.iter()
-            .map(|x| normalize(*x))
+            .map(|x| Gameboard::normalize(*x))
             .collect();
 
 
@@ -89,6 +83,19 @@ impl Gameboard {
         let mut vec: Vec<u8> = (0..16).collect();
         vec.shuffle(&mut rng);
         vec
+    }
+
+    /// Fill empty symbol
+    fn normalize(x: u8) -> String {
+        match x {
+            0 => "zz".to_owned(),
+            v if v < 10 => format!("0{}", v),
+            v => format!("{}", v)
+        }
+    }
+
+    pub fn cell_as_string(&self, idx:(usize, usize)) ->String{
+        Self::normalize(self.cells[idx.0][idx.1])
     }
 
 
@@ -200,5 +207,21 @@ mod tests {
     fn display_show() {
         let mut g = Gameboard::new();
         println!("{}", g);
+    }
+
+
+    #[test]
+    fn sell_as_string_test(){
+        for _ in 0..100{
+            let g = Gameboard::new();
+            let cs = g.cell_as_string((2,2));
+            let cu = g.cells[2][2];
+            match cu {
+                0 => assert_eq!(&cs[..],"zz"),
+                1..=9 => assert_eq!(&cs, &format!("0{}",cu)),
+                x => assert_eq!(&format!("{}",cu),&cs)
+            }
+
+        }
     }
 }
