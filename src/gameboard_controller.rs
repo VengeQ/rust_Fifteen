@@ -14,7 +14,7 @@ impl GameboardController {
     }
 
     ///Main function. Swap two neighbour cells, if one is zero cell.
-    fn swap_rectangle_or_cancel(&mut self, cell: (usize, usize), prev_cell:(usize,usize)) {
+    fn swap_rectangle_or_cancel(&mut self, cell: [usize;2], prev_cell:[usize;2]) {
         if self.gameboard.zero()==cell{
             let was_swapped = self.gameboard.swap_with_zero(prev_cell);
             dbg!(was_swapped);
@@ -41,10 +41,10 @@ impl GameboardController {
                 //dbg!("x:{} y:{}",cell_x,cell_y);
                 match self.selected {
                     Some(sel) => {
-                        self.swap_rectangle_or_cancel((cell_x,cell_y),(sel[0], sel[1]));
+                        self.swap_rectangle_or_cancel([cell_x,cell_y],[sel[0], sel[1]]);
                     }
                     None => {
-                        if self.gameboard.zero() != (cell_x, cell_y) {
+                        if self.gameboard.zero() != [cell_x, cell_y] {
                             self.selected = Some([cell_x, cell_y])
                         }
                     }

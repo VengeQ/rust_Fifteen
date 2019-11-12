@@ -18,8 +18,6 @@ pub struct Gameboard {
 
 impl fmt::Display for Gameboard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-
-
         let c = self.cells;
         let transposed = vec![
             c[0][0], c[1][0], c[2][0], c[3][0],
@@ -66,11 +64,11 @@ impl Gameboard {
     }
 
     /// return 0-biased zero field (x,y)
-    pub fn zero(&self) -> (usize, usize) {
+    pub fn zero(&self) -> [usize; 2] {
         for x in 0..4 {
             for y in 0..4 {
                 if self.cells[x][y] == 0 {
-                    return (x, y);
+                    return [x, y];
                 }
             }
         }
@@ -88,29 +86,29 @@ impl Gameboard {
     /// Fill empty symbol
     fn normalize(x: u8) -> String {
         match x {
-            0 => "".to_owned(),
+            0 => "  ".to_owned(),
             v if v < 10 => format!("0{}", v),
             v => format!("{}", v)
         }
     }
 
-    pub fn cell_as_string(&self, idx:(usize, usize)) ->String{
-        Self::normalize(self.cells[idx.0][idx.1])
+    pub fn cell_as_string(&self, idx: [usize; 2]) -> String {
+        Self::normalize(self.cells[idx[0]][idx[1]])
     }
 
 
     ///Checks cells for neighbouring
-    pub fn is_neighbours(first: (usize, usize), second: (usize, usize)) -> bool {
+    pub fn is_neighbours(first: [usize; 2], second: [usize; 2]) -> bool {
         if first == second {
             return false;
         }
         //Соседи всегда на одной линии
-        if first.0 != second.0 && first.1 != second.1 {
+        if first[0] != second[0] && first[1] != second[1] {
             return false;
         }
 
         let (i_first, i_second) =
-            ((first.0 as isize, first.1 as isize), (second.0 as isize, second.1 as isize));
+            ((first[0] as isize, first[1] as isize), (second[0] as isize, second[1] as isize));
 
         if i_first.0 == i_second.0 && (i_first.1 - i_second.1).abs() == 1 {
             return true;
@@ -122,16 +120,16 @@ impl Gameboard {
         false
     }
 
-    pub fn swap_with_zero(&mut self, cell: (usize, usize)) -> bool {
+    pub fn swap_with_zero(&mut self, cell: [usize; 2]) -> bool {
         let zero = self.zero();
-       // dbg!(cell);
-      //  dbg!(zero);
+        // dbg!(cell);
+        //  dbg!(zero);
         let isn = Gameboard::is_neighbours(cell, zero);
-      //  dbg!("Is_neighbours:{}",isn);
+        //  dbg!("Is_neighbours:{}",isn);
         if isn {
-            let temporary = self.cells[cell.0][cell.1];
-            self.cells[cell.0][cell.1] = self.cells[zero.0][zero.1];
-            self.cells[zero.0][zero.1] = temporary;
+            let temporary = self.cells[cell[0]][cell[1]];
+            self.cells[cell[0]][cell[1]] = self.cells[zero[0]][zero[1]];
+            self.cells[zero[0]][zero[1]] = temporary;
             true
         } else {
             false
@@ -153,7 +151,7 @@ mod tests {
         let gameboard = Gameboard::new();
         let gameboard_flatten = gameboard.cells.iter()
             .flat_map(|x| vec![x[0], x[1], x[2], x[3]]).collect::<Vec<u8>>();
-      //  dbg!(&gameboard);
+        //  dbg!(&gameboard);
         //Каждое число встречается не более одного раза
         for x in &gameboard_flatten {
             assert_eq!(gameboard_flatten.iter().filter(|v| *v == x).count(), 1);
@@ -164,18 +162,17 @@ mod tests {
     fn zero_test_smoke() {
         for _ in 0..100 {
             let gameboard = Gameboard::new();
-            let (x, y) = gameboard.zero();
-            assert!(x <= 3);
-            assert!(y <= 3);
+            assert!(gameboard.zero()[0] <= 3);
+            assert!(gameboard.zero()[1] <= 3);
         }
     }
 
     #[test]
     fn is_neighbours_test() {
-        let c1 = (2_usize, 3_usize);
-        let c2 = (1_usize, 0_usize);
-        let c3 = (2_usize, 2_usize);
-        let c4 = (1_usize, 3_usize);
+        let c1 = [2_usize, 3_usize];
+        let c2 = [1_usize, 0_usize];
+        let c3 = [2_usize, 2_usize];
+        let c4 = [1_usize, 3_usize];
         assert_eq!(Gameboard::is_neighbours(c1, c2), false);
         assert_eq!(Gameboard::is_neighbours(c1, c3), true);
         assert_eq!(Gameboard::is_neighbours(c1, c4), true);
@@ -190,11 +187,11 @@ mod tests {
             let mut g = Gameboard::new();
 
             let zero = g.zero();
-            if zero == (2, 2) {
+            if zero == [2, 2] {
                 let before = g.cells[2][3];
                 println!("before");
                 println!("{}", g);
-                assert_eq!(g.swap_with_zero((2, 3)), true);
+                assert_eq!(g.swap_with_zero([2, 3]), true);
                 println!("after");
                 println!("{}", g);
                 assert_eq!(g.cells[2][2], before);
@@ -211,17 +208,16 @@ mod tests {
 
 
     #[test]
-    fn sell_as_string_test(){
-        for _ in 0..100{
+    fn sell_as_string_test() {
+        for _ in 0..100 {
             let g = Gameboard::new();
-            let cs = g.cell_as_string((2,2));
+            let cs = g.cell_as_string([2, 2]);
             let cu = g.cells[2][2];
             match cu {
-                0 => assert_eq!(&cs[..],"zz"),
-                1..=9 => assert_eq!(&cs, &format!("0{}",cu)),
-                x => assert_eq!(&format!("{}",cu),&cs)
+                0 => assert_eq!(&cs[..], "  "),
+                1..=9 => assert_eq!(&cs, &format!("0{}", cu)),
+                x => assert_eq!(&format!("{}", cu), &cs)
             }
-
         }
     }
 }

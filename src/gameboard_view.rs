@@ -59,9 +59,10 @@ impl GameboardView {
         Rectangle::new(settings.background_color)
             .draw(board_rect, &c.draw_state, c.transform, g);
 
-        let white= [1.0, 1.0, 1.0, 1.0];
+        let white = [1.0, 1.0, 1.0, 1.0];
 
-        let (zx, zy) = controller.gameboard.zero();
+        let zx = controller.gameboard.zero()[0];
+        let zy = controller.gameboard.zero()[1];
         //dbg!("zx:{} zy:{}",zx,zy);
         let zero_rect = [
             settings.position[0] + settings.size / 4.0 * zx as f64,
@@ -107,7 +108,7 @@ impl GameboardView {
         let cell_size = settings.size / 4.0;
         for j in 0..4 {
             for i in 0..4 {
-                let ch = controller.gameboard.cell_as_string((i, j));
+                let ch = controller.gameboard.cell_as_string([i, j]);
                 let pos = [
                     settings.position[0] + i as f64 * cell_size + 30.0,
                     settings.position[1] + j as f64 * cell_size + 60.0
@@ -118,7 +119,7 @@ impl GameboardView {
                           glyphs,
                           &c.draw_state,
                           c.transform.trans(pos[0], pos[1]),
-                          g).unwrap_or_else(|_|());
+                          g).unwrap_or_else(|_| ());
             }
         }
     }
