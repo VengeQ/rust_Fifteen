@@ -4,31 +4,49 @@ use piston::input::{GenericEvent, Button, MouseButton};
 pub struct GameboardController {
     pub gameboard: Gameboard,
     pub selected: Option<[usize; 2]>,
+    pub game_state: GameState,
     cursor_pos: [f64; 2],
+}
+
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum GameState {
+    Prepare,
+    Process,
+    GameOver,
 }
 
 ///Maybe some functions should be remove from model to controller
 impl GameboardController {
     pub fn new(gameboard: Gameboard) -> Self {
-        GameboardController { gameboard, selected: None, cursor_pos: [0_f64; 2] }
+        GameboardController { gameboard, selected: None, game_state: GameState::Prepare, cursor_pos: [0_f64; 2] }
     }
 
     ///Main function. Swap two neighbour cells, if one is zero cell.
-    fn swap_rectangle_or_cancel(&mut self, cell: [usize;2], prev_cell:[usize;2]) {
-        if self.gameboard.zero()==cell{
+    fn swap_rectangle_or_cancel(&mut self, cell: [usize; 2], prev_cell: [usize; 2]) {
+        if self.gameboard.zero() == cell {
+            self.gameboard.moves += 1;
             let was_swapped = self.gameboard.swap_with_zero(prev_cell);
             dbg!(was_swapped);
         }
+        println!("moves: {}", self.gameboard.moves);
         println!("{}", self.gameboard);
         self.selected = None;
     }
-
 
     pub fn event<E: GenericEvent>(&mut self, pos: [f64; 2], size: f64, event: &E) {
         if let Some(pos) = event.mouse_cursor_args() {
             //dbg!(pos);
             self.cursor_pos = pos;
         }
+
+        match self.game_state {
+            GameState::Prepare => { self.event_progress(pos, size, event) }
+            GameState::Process => { self.event_progress(pos, size, event) }
+            GameState::GameOver => { self.event_progress(pos, size, event) }
+        }
+    }
+
+    fn event_progress<E: GenericEvent>(&mut self, pos: [f64; 2], size: f64, event: &E) {
         if let Some(Button::Mouse(MouseButton::Left)) = event.press_args() {
             // Find coordinates relative to upper left corner.
             let x = self.cursor_pos[0] - pos[0];
@@ -41,7 +59,7 @@ impl GameboardController {
                 //dbg!("x:{} y:{}",cell_x,cell_y);
                 match self.selected {
                     Some(sel) => {
-                        self.swap_rectangle_or_cancel([cell_x,cell_y],[sel[0], sel[1]]);
+                        self.swap_rectangle_or_cancel([cell_x, cell_y], [sel[0], sel[1]]);
                     }
                     None => {
                         if self.gameboard.zero() != [cell_x, cell_y] {

@@ -48,6 +48,19 @@ impl GameboardView {
 
     /// Draw gameboard.
     pub fn draw<G: Graphics, C: CharacterCache<Texture=G::Texture>>(&self, controller: &GameboardController, glyphs: &mut C, c: &Context, g: &mut G) {
+        match controller.game_state{
+            _ =>self.draw_progress(controller,glyphs,c,g)
+        };
+
+
+    }
+
+    /// Draw start
+    fn draw_prepare<G: Graphics, C: CharacterCache<Texture=G::Texture>>(&self, controller: &GameboardController, glyphs: &mut C, c: &Context, g: &mut G){
+
+    }
+
+    fn draw_progress<G: Graphics, C: CharacterCache<Texture=G::Texture>>(&self, controller: &GameboardController, glyphs: &mut C, c: &Context, g: &mut G) {
         use graphics::{Line, Rectangle};
 
         let ref settings = self.settings;

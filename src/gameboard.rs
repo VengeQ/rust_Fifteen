@@ -13,7 +13,8 @@ const SIZE: usize = 4;
 ///
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Gameboard {
-    pub cells: [[u8; SIZE]; SIZE]
+    pub cells: [[u8; SIZE]; SIZE],
+    pub moves:usize
 }
 
 impl fmt::Display for Gameboard {
@@ -60,7 +61,7 @@ impl Gameboard {
                 cells[i][j] = vec[i * SIZE + j];
             }
         }
-        Gameboard { cells }
+        Gameboard { cells, moves: 0 }
     }
 
     /// return 0-biased zero field (x,y)
