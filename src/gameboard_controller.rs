@@ -1,5 +1,6 @@
 use super::Gameboard;
 use piston::input::{GenericEvent, Button, MouseButton};
+use crate::gameboard_controller::GameState::{GameOver, InProcess};
 
 pub struct GameboardController {
     pub gameboard: Gameboard,
@@ -11,7 +12,7 @@ pub struct GameboardController {
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub enum GameState {
     Prepare,
-    Process,
+    InProcess,
     GameOver,
 }
 
@@ -24,7 +25,6 @@ impl GameboardController {
     ///Main function. Swap two neighbour cells, if one is zero cell.
     fn swap_rectangle_or_cancel(&mut self, cell: [usize; 2], prev_cell: [usize; 2]) {
         if self.gameboard.zero() == cell {
-            self.gameboard.moves += 1;
             let was_swapped = self.gameboard.swap_with_zero(prev_cell);
             dbg!(was_swapped);
         }
@@ -40,12 +40,20 @@ impl GameboardController {
         }
 
         match self.game_state {
-            GameState::Prepare => { self.event_progress(pos, size, event) }
-            GameState::Process => { self.event_progress(pos, size, event) }
+            GameState::Prepare => {
+                self.event_prepare(pos, size, event)
+            }
+            GameState::InProcess => {
+                self.event_progress(pos, size, event);
+                if self.gameboard.is_over() {
+                    self.game_state = GameOver;
+                }
+            }
             GameState::GameOver => { self.event_progress(pos, size, event) }
         }
     }
 
+    //event-handler in progress game
     fn event_progress<E: GenericEvent>(&mut self, pos: [f64; 2], size: f64, event: &E) {
         if let Some(Button::Mouse(MouseButton::Left)) = event.press_args() {
             // Find coordinates relative to upper left corner.
@@ -73,6 +81,14 @@ impl GameboardController {
             //Unselect
             self.selected = None;
         }
+    }
+
+    //event-handler in prepare
+    fn event_prepare<E: GenericEvent>(&mut self, _pos: [f64; 2], _size: f64, event: &E) {
+        if let Some(Button::Mouse(MouseButton::Left)) = event.press_args() {
+            self.game_state = InProcess;
+        }
+
     }
 }
 

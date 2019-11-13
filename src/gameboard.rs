@@ -4,8 +4,8 @@ use rand::thread_rng;
 use rand::seq::SliceRandom;
 use std::fmt;
 
-const SIZE: usize = 4;
-
+pub const SIZE: usize = 4;
+pub const FSIZE: f64 = 4.0;
 ///
 /// Current cells with [[u8; SIZE]; SIZE]
 /// may be inappropriate, and [u8;SIZE*SIZE]
@@ -128,6 +128,7 @@ impl Gameboard {
         let isn = Gameboard::is_neighbours(cell, zero);
         //  dbg!("Is_neighbours:{}",isn);
         if isn {
+            self.moves += 1;
             let temporary = self.cells[cell[0]][cell[1]];
             self.cells[cell[0]][cell[1]] = self.cells[zero[0]][zero[1]];
             self.cells[zero[0]][zero[1]] = temporary;
@@ -135,6 +136,11 @@ impl Gameboard {
         } else {
             false
         }
+    }
+
+    //Need to implemnt
+    pub fn is_over(&self) -> bool{
+        false
     }
 }
 
@@ -184,7 +190,7 @@ mod tests {
 
     #[test]
     fn swap_with_zero_test() {
-        for i in 0..100 {
+        for _ in 0..100 {
             let mut g = Gameboard::new();
 
             let zero = g.zero();
@@ -217,7 +223,7 @@ mod tests {
             match cu {
                 0 => assert_eq!(&cs[..], "  "),
                 1..=9 => assert_eq!(&cs, &format!("0{}", cu)),
-                x => assert_eq!(&format!("{}", cu), &cs)
+                _ => assert_eq!(&format!("{}", cu), &cs)
             }
         }
     }
