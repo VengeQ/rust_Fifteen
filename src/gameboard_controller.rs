@@ -1,5 +1,5 @@
 use super::Gameboard;
-use piston::input::{GenericEvent, Button, MouseButton};
+use piston::input::{GenericEvent, Button, MouseButton, Key};
 use crate::gameboard_controller::GameState::{GameOver, InProcess};
 
 pub struct GameboardController {
@@ -26,11 +26,15 @@ impl GameboardController {
     fn swap_rectangle_or_cancel(&mut self, cell: [usize; 2], prev_cell: [usize; 2]) {
         if self.gameboard.zero() == cell {
             let was_swapped = self.gameboard.swap_with_zero(prev_cell);
+            if self.gameboard.is_over(){
+                self.game_state=GameOver;
+            }
             dbg!(was_swapped);
         }
         println!("moves: {}", self.gameboard.moves);
         println!("{}", self.gameboard);
         self.selected = None;
+
     }
 
     pub fn event<E: GenericEvent>(&mut self, pos: [f64; 2], size: f64, event: &E) {
@@ -45,9 +49,7 @@ impl GameboardController {
             }
             GameState::InProcess => {
                 self.event_progress(pos, size, event);
-                if self.gameboard.is_over() {
-                    self.game_state = GameOver;
-                }
+
             }
             GameState::GameOver => { self.event_progress(pos, size, event) }
         }
@@ -84,11 +86,14 @@ impl GameboardController {
     }
 
     //event-handler in prepare
-    fn event_prepare<E: GenericEvent>(&mut self, _pos: [f64; 2], _size: f64, event: &E) {
-        if let Some(Button::Mouse(MouseButton::Left)) = event.press_args() {
+    fn event_prepare<E: GenericEvent>(&mut self, pos: [f64; 2], size: f64, event: &E) {
+        if let Some(Button::Keyboard(Key::Space)) = event.press_args() {
+            let x = self.cursor_pos[0] - pos[0];
+            let y = self.cursor_pos[1] - pos[1];
+            // Check that coordinates are inside board boundaries.
+            if x >= 0.0 && x < size && y >= 0.0 && y < size {}
             self.game_state = InProcess;
         }
-
     }
 }
 

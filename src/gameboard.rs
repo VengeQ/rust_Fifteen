@@ -6,6 +6,7 @@ use std::fmt;
 
 pub const SIZE: usize = 4;
 pub const FSIZE: f64 = 4.0;
+
 ///
 /// Current cells with [[u8; SIZE]; SIZE]
 /// may be inappropriate, and [u8;SIZE*SIZE]
@@ -14,17 +15,13 @@ pub const FSIZE: f64 = 4.0;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Gameboard {
     pub cells: [[u8; SIZE]; SIZE],
-    pub moves:usize
+    pub moves: usize,
 }
 
 impl fmt::Display for Gameboard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let c = self.cells;
-        let transposed = vec![
-            c[0][0], c[1][0], c[2][0], c[3][0],
-            c[0][1], c[1][1], c[2][1], c[3][1],
-            c[0][2], c[1][2], c[2][2], c[3][2],
-            c[0][3], c[1][3], c[2][3], c[3][3]];
+        let transposed = self.transpose_flatten();
 
         let res: Vec<String> = transposed.iter()
             .map(|x| Gameboard::normalize(*x))
@@ -64,11 +61,11 @@ impl Gameboard {
         Gameboard { cells, moves: 0 }
     }
 
-    /// return 0-biased zero field (x,y)
+    /// return 0-biased zero field (x,y). Zero has value of 16
     pub fn zero(&self) -> [usize; 2] {
         for x in 0..4 {
             for y in 0..4 {
-                if self.cells[x][y] == 0 {
+                if self.cells[x][y] == 16 {
                     return [x, y];
                 }
             }
@@ -79,7 +76,7 @@ impl Gameboard {
     /// Shuffle values while init new board
     fn shuffle_vec() -> Vec<u8> {
         let mut rng = thread_rng();
-        let mut vec: Vec<u8> = (0..16).collect();
+        let mut vec: Vec<u8> = (1..=16).collect();
         vec.shuffle(&mut rng);
         vec
     }
@@ -87,7 +84,7 @@ impl Gameboard {
     /// Fill empty symbol
     fn normalize(x: u8) -> String {
         match x {
-            0 => "  ".to_owned(),
+            16 => "  ".to_owned(),
             v if v < 10 => format!("0{}", v),
             v => format!("{}", v)
         }
@@ -121,6 +118,7 @@ impl Gameboard {
         false
     }
 
+    ///Main action. Swap cells with empty cells
     pub fn swap_with_zero(&mut self, cell: [usize; 2]) -> bool {
         let zero = self.zero();
         // dbg!(cell);
@@ -138,9 +136,29 @@ impl Gameboard {
         }
     }
 
+
+    fn transpose_flatten(&self) -> Vec<u8> {
+        let mut transposed = self.cells;
+        for i in 0..self.cells.len() {
+            for j in 0..self.cells.len() {
+                transposed[i][j] = self.cells[j][i];
+            }
+        }
+        transposed.iter().flatten().map(|x| *x).collect::<Vec<u8>>()
+    }
+
     //Need to implemnt
-    pub fn is_over(&self) -> bool{
-        false
+    pub fn is_over(&self) -> bool {
+        fn check_order(vec: &[u8], value: u8) -> bool {
+            if vec.len()==0 {
+                return true
+            }
+            let current= *vec.first().unwrap();
+            println!("v: {} h: {}", value, vec.first().unwrap_or(&255_u8));
+            value < current && check_order(&vec[1..], current)
+        }
+        let v = self.transpose_flatten();
+        check_order(&v, 0)
     }
 }
 
@@ -202,7 +220,7 @@ mod tests {
                 println!("after");
                 println!("{}", g);
                 assert_eq!(g.cells[2][2], before);
-                assert_eq!(g.cells[2][3], 0);
+                assert_eq!(g.cells[2][3], 16);
             }
         }
     }
@@ -221,10 +239,42 @@ mod tests {
             let cs = g.cell_as_string([2, 2]);
             let cu = g.cells[2][2];
             match cu {
-                0 => assert_eq!(&cs[..], "  "),
+                16 => assert_eq!(&cs[..], "  "),
                 1..=9 => assert_eq!(&cs, &format!("0{}", cu)),
                 _ => assert_eq!(&format!("{}", cu), &cs)
             }
         }
+    }
+
+    #[test]
+    fn transpose_test() {
+        let g = Gameboard::new();
+        let tr = g.transpose_flatten();
+        let c = g.cells;
+        let manual_tr = vec![
+            c[0][0], c[1][0], c[2][0], c[3][0],
+            c[0][1], c[1][1], c[2][1], c[3][1],
+            c[0][2], c[1][2], c[2][2], c[3][2],
+            c[0][3], c[1][3], c[2][3], c[3][3]];
+        assert_eq!(tr, manual_tr);
+    }
+
+    #[test]
+    fn is_over_test() {
+        for _ in 0..100{
+            let  g = Gameboard::new();
+            assert_eq!(g.is_over(), false);
+        }
+        let mut g = Gameboard::new();
+        assert_eq!(g.is_over(), false);
+        let mut cells = [[0; SIZE]; SIZE];
+        for i in 0..SIZE {
+            for j in 0..SIZE {
+                cells[j][i] = i as u8 * 4 + j as u8 + 1;
+            }
+        }
+        g.cells = cells;
+        println!("{}", g);
+        assert_eq!(g.is_over(), true);
     }
 }

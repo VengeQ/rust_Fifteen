@@ -76,7 +76,7 @@ impl GameboardView {
             .draw(board_rect, &c.draw_state, c.transform, g);
 
         //start Game
-        let points = format!("Press any key to start!");
+        let points = format!("Press Space to start!");
         text::Text::new_color(settings.text_color, 40)
             .draw(&points,
                   glyphs,
