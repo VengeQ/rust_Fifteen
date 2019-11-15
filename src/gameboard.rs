@@ -150,12 +150,10 @@ impl Gameboard {
     //Need to implemnt
     pub fn is_over(&self) -> bool {
         fn check_order(vec: &[u8], value: u8) -> bool {
-            if vec.len()==0 {
-                return true
+            match vec.first(){
+                None => true,
+                Some(current) => value < *current && check_order(&vec[1..], *current)
             }
-            let current= *vec.first().unwrap();
-            println!("v: {} h: {}", value, vec.first().unwrap_or(&255_u8));
-            value < current && check_order(&vec[1..], current)
         }
         let v = self.transpose_flatten();
         check_order(&v, 0)
