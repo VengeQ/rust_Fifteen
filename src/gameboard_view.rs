@@ -159,7 +159,6 @@ impl GameboardView {
     fn draw_fields<G: Graphics>(&self, controller: &mut GameboardController, c: &Context, g: &mut G) {
         let settings = &self.settings;
         let animate_shift = controller.animator.animate(controller.animate_direction);
-        dbg!(animate_shift);
         //Zero rectangle
         let zx = controller.gameboard.zero()[0];
         let zy = controller.gameboard.zero()[1];
@@ -173,13 +172,39 @@ impl GameboardView {
                 .draw(zero_rect, &c.draw_state, c.transform, g);
         }
         else {
-            let new_zero_rect = [
-                settings.position[0] + settings.size / FSIZE * zx as f64 + animate_shift[0],
-                settings.position[1] + settings.size / FSIZE * zy as f64 + animate_shift[1],
-                settings.size / FSIZE - animate_shift[0], settings.size / FSIZE - animate_shift[1],
+            let (x,y) = match controller.animate_direction{
+                Direction::Top => (0.0,-0.0),
+                Direction::Right => (0.0,0.0),
+                Direction::Bottom => (0.0,0.0),
+                Direction::Left => (-0.0,0.0),
+            };
+            let prev_zero_rect = [
+                settings.position[0] + settings.size / FSIZE * zx as f64  +x ,
+                settings.position[1] + settings.size / FSIZE * zy as f64 +y ,
+                settings.size / FSIZE - f64::abs(animate_shift[0]),
+                settings.size / FSIZE - f64::abs(animate_shift[1])
             ];
-        }
 
+            ///ToDo correct view
+            let (x,y) = match controller.animate_direction{
+                Direction::Top => (0.0,110.0),
+                Direction::Right => (-110.0+ animate_shift[0],0.0),
+                Direction::Bottom => (0.0,-110.0+ animate_shift[1]),
+                Direction::Left => (-110.0,0.0),
+            };
+            let next_zero_rect = [
+                settings.position[0] + settings.size / FSIZE * zx as f64  +x ,
+                settings.position[1] + settings.size / FSIZE * zy as f64 +y ,
+                settings.size / FSIZE - f64::abs(animate_shift[0]),
+                settings.size / FSIZE - f64::abs(animate_shift[1])
+            ];
+
+            Rectangle::new(settings.zero_color)
+                .draw(prev_zero_rect, &c.draw_state, c.transform, g);
+            Rectangle::new(settings.zero_color)
+                .draw(next_zero_rect, &c.draw_state, c.transform, g);
+
+        }
 
         //Selected rectangle
         if let Some(sel) = controller.selected {

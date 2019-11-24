@@ -34,7 +34,7 @@ impl GameboardController {
         if self.animator.is_over() {
 
             if self.gameboard.zero() == cell {
-                self.animator.start();
+
                 self.animate_cell=cell;
                 if cell[0] > prev_cell[0] {
                     self.animate_direction = Right;
@@ -46,6 +46,9 @@ impl GameboardController {
                     self.animate_direction = Top;
                 }
                 let was_swapped = self.gameboard.swap_with_zero(prev_cell);
+                if was_swapped{
+                    self.animator.start();
+                }
                 if self.gameboard.is_over() {
                     self.game_state = GameOver;
                 }

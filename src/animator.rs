@@ -25,7 +25,7 @@ impl PlainAnimator {
 
     fn resume_animate(&mut self, direction: Direction) -> [f64; 2] {
         if self.count < self.max {
-            self.count += 2.0;
+            self.count += 1.0;
             let (x, y) = match direction {
                 Direction::Top => (0.0, -(self.count)),
                 Direction::Right => ( self.count, 0.0),

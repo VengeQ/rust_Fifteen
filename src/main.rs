@@ -25,6 +25,8 @@ use piston::event_loop::*;
 use piston::input::*;
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{OpenGL, Filter, GlGraphics, GlyphCache, TextureSettings};
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     let opengl = OpenGL::V3_2;
@@ -54,6 +56,7 @@ fn main() {
 
                 clear([1.0; 4], g);
                 gameboard_view.draw(&mut gameboard_controller, glyphs, &c, g);
+                thread::sleep(Duration::from_millis(50));
             });
         }
     }
