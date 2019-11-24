@@ -12,10 +12,13 @@ extern crate opengl_graphics;
 mod gameboard;
 mod gameboard_controller;
 mod gameboard_view;
+mod animator;
+
 
 pub use gameboard::Gameboard;
 pub use gameboard_controller::GameboardController;
 pub use gameboard_view::{GameboardView, GameboardViewSettings};
+pub use animator::Animator;
 
 use piston::window::WindowSettings;
 use piston::event_loop::*;
@@ -39,7 +42,8 @@ fn main() {
     let gameboard = Gameboard::new();
     println!("{}", &gameboard);
     dbg!(&gameboard);
-    let mut gameboard_controller = GameboardController::new(gameboard);
+    let anima:Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 5.0,20.0));
+    let mut gameboard_controller = GameboardController::new(gameboard, anima);
     let gameboard_view_settings = GameboardViewSettings::new();
     let gameboard_view = GameboardView::new(gameboard_view_settings);
     while let Some(e) = events.next(&mut window) {
@@ -49,7 +53,7 @@ fn main() {
                 use graphics::clear;
 
                 clear([1.0; 4], g);
-                gameboard_view.draw(&gameboard_controller, glyphs, &c, g);
+                gameboard_view.draw(&mut gameboard_controller, glyphs, &c, g);
             });
         }
     }
