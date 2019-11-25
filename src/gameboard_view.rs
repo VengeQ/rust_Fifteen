@@ -6,9 +6,9 @@ use crate::gameboard_controller::GameState;
 
 use super::gameboard::{FSIZE, SIZE};
 use super::gameboard_controller::GameboardController;
-use crate::Animator;
 use crate::animator::Direction;
 
+#[derive(Default)]
 ///Rendering settings
 pub struct GameboardViewSettings {
     pub position: [f64; 2],
@@ -66,8 +66,7 @@ impl GameboardView {
 
     /// Draw prepare
     fn draw_prepare<G: Graphics, C: CharacterCache<Texture=G::Texture>>(&self, _controller: &GameboardController, glyphs: &mut C, c: &Context, g: &mut G) {
-        use graphics::Rectangle;
-        let ref settings = self.settings;
+        let settings = &self.settings;
 
         //Board
         let board_rect = [
@@ -78,9 +77,9 @@ impl GameboardView {
             .draw(board_rect, &c.draw_state, c.transform, g);
 
         //start Game
-        let points = format!("Press Space to start!");
+        let points ="Press Space to start!";
         text::Text::new_color(settings.text_color, 40)
-            .draw(&points,
+            .draw(points,
                   glyphs,
                   &c.draw_state,
                   c.transform.trans(10.0, settings.size / FSIZE * 1.5),
@@ -89,7 +88,7 @@ impl GameboardView {
 
     ///Draw in progress
     fn draw_progress<G: Graphics, C: CharacterCache<Texture=G::Texture>>(&self, controller: &mut GameboardController, glyphs: &mut C, c: &Context, g: &mut G) {
-        let ref settings = self.settings;
+        let settings = &self.settings;
 
         self.draw_board(c, g);
         self.draw_fields(controller, c, g);
@@ -175,21 +174,21 @@ impl GameboardView {
             let (x,y) = match controller.animate_direction{
                 Direction::Top => (0.0,-0.0),
                 Direction::Right => (0.0,0.0),
-                Direction::Bottom => (0.0,0.0),
-                Direction::Left => (-0.0,0.0),
+                Direction::Bottom => (0.0,animate_shift[0]),
+                Direction::Left => (0.0,0.0),
             };
             let prev_zero_rect = [
                 settings.position[0] + settings.size / FSIZE * zx as f64  +x ,
                 settings.position[1] + settings.size / FSIZE * zy as f64 +y ,
-                settings.size / FSIZE - f64::abs(animate_shift[0]),
-                settings.size / FSIZE - f64::abs(animate_shift[1])
+                110.0,
+                f64::abs(animate_shift[1])
             ];
 
-            ///ToDo correct view
+            //ToDo correct view
             let (x,y) = match controller.animate_direction{
-                Direction::Top => (0.0,110.0),
-                Direction::Right => (-110.0+ animate_shift[0],0.0),
-                Direction::Bottom => (0.0,-110.0+ animate_shift[1]),
+                Direction::Top => (0.0,-110.0),
+                Direction::Right => (110.0+ animate_shift[0],0.0),
+                Direction::Bottom => (0.0,110.0+ animate_shift[1]),
                 Direction::Left => (-110.0,0.0),
             };
             let next_zero_rect = [
@@ -199,10 +198,11 @@ impl GameboardView {
                 settings.size / FSIZE - f64::abs(animate_shift[1])
             ];
 
-            Rectangle::new(settings.zero_color)
-                .draw(prev_zero_rect, &c.draw_state, c.transform, g);
-            Rectangle::new(settings.zero_color)
-                .draw(next_zero_rect, &c.draw_state, c.transform, g);
+            if controller.animate_direction==Direction::Bottom{
+                Rectangle::new(settings.zero_color).draw(prev_zero_rect, &c.draw_state, c.transform, g);
+            }
+            //
+            Rectangle::new(settings.zero_color).draw(next_zero_rect, &c.draw_state, c.transform, g);
 
         }
 

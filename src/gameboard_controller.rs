@@ -31,32 +31,33 @@ impl GameboardController {
 
     ///Main function. Swap two neighbour cells, if one is zero cell.
     fn swap_rectangle_or_cancel(&mut self, cell: [usize; 2], prev_cell: [usize; 2]) {
+        //Если предыдушая анимация завершилась
         if self.animator.is_over() {
-
             if self.gameboard.zero() == cell {
-
                 self.animate_cell=cell;
-                if cell[0] > prev_cell[0] {
-                    self.animate_direction = Right;
-                } else if cell[0] < prev_cell[0] {
-                    self.animate_direction = Left;
-                } else if cell[1] > prev_cell[1] {
-                    self.animate_direction = Bottom;
-                } else {
-                    self.animate_direction = Top;
-                }
-                let was_swapped = self.gameboard.swap_with_zero(prev_cell);
-                if was_swapped{
+                self.fetch_direction(cell, prev_cell);
+                if self.gameboard.swap_with_zero(prev_cell){
                     self.animator.start();
                 }
                 if self.gameboard.is_over() {
                     self.game_state = GameOver;
                 }
-                dbg!(was_swapped);
             }
             println!("moves: {}", self.gameboard.moves);
             println!("{}", self.gameboard);
             self.selected = None;
+        }
+    }
+
+    fn fetch_direction(&mut self, cell: [usize; 2], prev_cell: [usize; 2]){
+        if cell[0] > prev_cell[0] {
+            self.animate_direction = Right;
+        } else if cell[0] < prev_cell[0] {
+            self.animate_direction = Left;
+        } else if cell[1] > prev_cell[1] {
+            self.animate_direction = Bottom;
+        } else {
+            self.animate_direction = Top;
         }
     }
 
@@ -126,7 +127,13 @@ mod tests {
 
     #[test]
     fn new_gameboard_controller_test_smoke() {
-        let anima: Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 10.0, 10.0));
+        let anima: Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 10.0));
+        let _gb = GameboardController::new(Gameboard::new(), anima);
+    }
+
+    #[test]
+    fn change_direction_test(){
+        let anima: Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 10.0));
         let _gb = GameboardController::new(Gameboard::new(), anima);
     }
 }

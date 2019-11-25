@@ -12,7 +12,7 @@ pub const FSIZE: f64 = 4.0;
 /// may be inappropriate, and [u8;SIZE*SIZE]
 /// with easy linear arithmetic (web-assembly plain style) looks good.
 ///
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct Gameboard {
     pub cells: [[u8; SIZE]; SIZE],
     pub moves: usize,
@@ -20,16 +20,14 @@ pub struct Gameboard {
 
 impl fmt::Display for Gameboard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let c = self.cells;
         let transposed = self.transpose_flatten();
 
         let res: Vec<String> = transposed.iter()
             .map(|x| Gameboard::normalize(*x))
             .collect();
 
-
         let mut result = "".to_owned();
-        for i in 0..res.len() {
+        for (i, _) in res.iter().enumerate() {
             result += &res[i];
             if (i + 1) % 4 == 0 {
                 result += "\n"
@@ -127,9 +125,9 @@ impl Gameboard {
         //  dbg!("Is_neighbours:{}",isn);
         if isn {
             self.moves += 1;
-            let temporary = self.cells[cell[0]][cell[1]];
-            self.cells[cell[0]][cell[1]] = self.cells[zero[0]][zero[1]];
-            self.cells[zero[0]][zero[1]] = temporary;
+            let temporary = self.cells[zero[0]][zero[1]];
+            self.cells[zero[0]][zero[1]]  = std::mem::replace(& mut self.cells[cell[0]][cell[1]],temporary);
+
             true
         } else {
             false
@@ -139,18 +137,18 @@ impl Gameboard {
 
     fn transpose_flatten(&self) -> Vec<u8> {
         let mut transposed = self.cells;
-        for i in 0..self.cells.len() {
-            for j in 0..self.cells.len() {
+        for i in 0..transposed.len() {
+            for j in 0..transposed.len() {
                 transposed[i][j] = self.cells[j][i];
             }
         }
-        transposed.iter().flatten().map(|x| *x).collect::<Vec<u8>>()
+        transposed.iter().flatten().copied().collect::<Vec<u8>>()
     }
 
     //Need to implemnt
     pub fn is_over(&self) -> bool {
         fn check_order(vec: &[u8], value: u8) -> bool {
-            match vec.first(){
+            match vec.first() {
                 None => true,
                 Some(current) => value < *current && check_order(&vec[1..], *current)
             }
@@ -229,7 +227,6 @@ mod tests {
         println!("{}", g);
     }
 
-
     #[test]
     fn sell_as_string_test() {
         for _ in 0..100 {
@@ -259,8 +256,8 @@ mod tests {
 
     #[test]
     fn is_over_test() {
-        for _ in 0..100{
-            let  g = Gameboard::new();
+        for _ in 0..100 {
+            let g = Gameboard::new();
             assert_eq!(g.is_over(), false);
         }
         let mut g = Gameboard::new();

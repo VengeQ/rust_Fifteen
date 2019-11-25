@@ -14,18 +14,19 @@ pub struct PlainAnimator {
 }
 
 impl PlainAnimator {
-    pub fn new(max: f64, step: f64, count: f64) -> Self {
-
+    pub fn new(max: f64, step: f64) -> Self {
         Self { max, step, count:max }
     }
 
+    //сбросить
     fn reset(&mut self) {
         self.count = 0.0;
     }
 
     fn resume_animate(&mut self, direction: Direction) -> [f64; 2] {
+        //если анимация не завершена продолжить, в противном случае вернуть нулевые изменения
         if self.count < self.max {
-            self.count += 1.0;
+            self.count += 1.0 *self.step;
             let (x, y) = match direction {
                 Direction::Top => (0.0, -(self.count)),
                 Direction::Right => ( self.count, 0.0),
@@ -46,13 +47,8 @@ impl Animator for PlainAnimator {
         }
     }
 
-
     fn is_over(&self) -> bool {
-        if self.count >= self.max {
-            true
-        } else {
-            false
-        }
+        self.count >= self.max
     }
 
     fn start(&mut self) {

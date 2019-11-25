@@ -25,9 +25,6 @@ use piston::event_loop::*;
 use piston::input::*;
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{OpenGL, Filter, GlGraphics, GlyphCache, TextureSettings};
-use std::thread;
-use std::time::Duration;
-
 fn main() {
     let opengl = OpenGL::V3_2;
     let settings = WindowSettings::new("Fifteen", [460, 500])
@@ -40,11 +37,11 @@ fn main() {
     let mut events = Events::new(EventSettings::new()); //lazy, так как анимации не будет никакой.
     let mut gl = GlGraphics::new(opengl);
     let texture_settings = TextureSettings::new().filter(Filter::Nearest);
-    let ref mut glyphs = GlyphCache::new("assets/amazone.ttf", (), texture_settings).expect("Could not load font");
+    let glyphs =& mut GlyphCache::new("assets/amazone.ttf", (), texture_settings).expect("Could not load font");
     let gameboard = Gameboard::new();
     println!("{}", &gameboard);
     dbg!(&gameboard);
-    let anima:Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 5.0,20.0));
+    let anima:Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 5.0));
     let mut gameboard_controller = GameboardController::new(gameboard, anima);
     let gameboard_view_settings = GameboardViewSettings::new();
     let gameboard_view = GameboardView::new(gameboard_view_settings);
@@ -56,7 +53,6 @@ fn main() {
 
                 clear([1.0; 4], g);
                 gameboard_view.draw(&mut gameboard_controller, glyphs, &c, g);
-                thread::sleep(Duration::from_millis(50));
             });
         }
     }
