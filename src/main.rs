@@ -41,7 +41,7 @@ fn main() {
     let gameboard = Gameboard::new();
     println!("{}", &gameboard);
     dbg!(&gameboard);
-    let anima:Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 5.0));
+    let anima:Box<dyn Animator> = Box::new(animator::PlainAnimator::new(100.0, 10.0));
     let mut gameboard_controller = GameboardController::new(gameboard, anima);
     let gameboard_view_settings = GameboardViewSettings::new();
     let gameboard_view = GameboardView::new(gameboard_view_settings);
